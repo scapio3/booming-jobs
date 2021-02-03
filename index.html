@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+    <title>Booming jobs search</title>
+    <head>
+        <style>
+            table {
+              font-family: arial, sans-serif;
+              border-collapse: collapse;
+              width: 100%;
+            }
+            
+            td, th {
+              border: 1px solid #dddddd;
+              text-align: left;
+              padding: 8px;
+            }
+            
+            tr:nth-child(even) {
+              background-color: #dddddd;
+            }
+            </style>
+    </head>
+<body>
+
+<h1>Booming jobs search relevance tool</h1>
+
+<p style="background-color:blanchedalmond;width: 80%;">To test the relevance and the efficency of the search functionality make a <b>POST</b> request to the <b>https://booming-search.herokuapp.com/analyze </b>endpoint.</p>
+
+<p>Payload for the request : </p>
+<textarea rows="7" cols="60" style = "resize: none;color:blue;overflow: hidden;">
+       {
+        "title" : "term to search",
+        "location" : "job location(optional)",
+        "pageSize" : 24,
+        "pageNumber":1    
+       }
+    
+</textarea>
+
+<p>Exampe of the response :</p>
+<textarea rows="13" cols="60" style = "resize: none;color:blue;overflow: hidden;">
+    {
+        "query_term": "term to search",
+        "cumulative_gain": 0,
+        "discounted_cumulative_gain": 0,
+        "ideal_cumulative_gain": 0,
+        "normalized_cumulative_gain": null,
+        "precision": null,
+        "precision_including_term_in_description": null,
+        "full_results": {
+            "perfect_hits": [],
+            "relevant_hits": [],
+            "irrelevant_hits": []
+        }
+    }
+ 
+</textarea>
+
+<h3>Overall approach explained : </h3>
+<div style="background-color:skyblue;width: 80%;" >
+<p style="margin:0;">For every search result returned a rank is given.There are 3 different ranks:</p>
+<hr>
+<p style="margin:0"><b>Perfect rank</b>  with the graded relevance value <b>2</b> is given to the results that contains search term in the <b>title</b>.</p>
+<p style="margin:0"><b>Relevant rank</b> with the graded relevance value of <b>1</b> is given to the results that contains search term in the <b>description</b>,but not in the title.</p>
+<p style="margin:0"><b>Irrelevant rank </b> with the graded relevance value of <b>0</b> is given to the result that <b>doesn't contain</b> search term neither in title or description.</p>
+</div>
+
+<h3>Response terms explained</h3>
+<table>
+    <tr>
+      <th>Term</th>
+      <th>Description</th>
+  
+    </tr>
+    <tr>
+      <td>Cumulative gain</td>
+      <td>Cumulative Gain (CG) is the sum of the graded relevance values of all results in a search result list</td>
+    
+    </tr>
+    <tr>
+      <td>Discounted cumulative gain</td>
+      <td> Measure for ranking quality and measures the usefulness (gain) of an item based on its relevance and position in the search list.</td>
+    </tr>
+    <tr>
+      <td>Ideal discounted cumulative gain</td>
+      <td>The ideal ranking would first return the documents with the highest relevance level, then the next highest relevance level, etc</td>
+    </tr>
+    <tr>
+      <td>Normalized discounted cumulative gain</td>
+      <td>Discounted cumulative gain / Ideal discounted cumulative gain</td>
+    </tr>
+    <tr>
+      <td>Precision</td>
+      <td>Number of search results containing search term in title against the total number of search results </td>
+    </tr>
+    <tr>
+      <td>Precision including term in description</td>
+      <td>Number of search results containing search term in title and description against the total number of search results</td>
+    </tr>
+  </table>
+</body>
+</html>
