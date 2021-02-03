@@ -4,6 +4,7 @@ const express = require('express');
 const router = express.Router();
 const bodyParser = require("body-parser");
 const app = express();
+const path = require('path');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -183,11 +184,10 @@ function calculateNumberOfKeyworsInDescription(description,term) {
     return keyword_in_description.length;
 }
 
-router.get('/',async function(req,res)
+router.get('/', function(req,res)
 {
-var result = await callSearch('QA',[''],24,1);  
-console.log(result);
-res.json(result);
+
+    res.sendFile(path.join(__dirname + '/index.html'));
 });
 
 
