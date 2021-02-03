@@ -9,9 +9,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 const port = process.env.PORT || 3000;
 
-
-
-
 //function to call search api
 const callSearch = async(title,locations,pageSize,pageNumber) =>{
 
@@ -34,6 +31,7 @@ const callSearch = async(title,locations,pageSize,pageNumber) =>{
     
     }
     let response = {
+        query_term:null,
         cumulative_gain :null,
         discounted_cumulative_gain : null,
         ideal_cumulative_gain : null,
@@ -52,7 +50,7 @@ const res = await axios.post('https://api.booming.jobs/api/search', payload);
         let wrongHits = 0;
         let titleInDescriptionHits = 0;
 
-        let titleToCompare = title.toLowerCase();
+      //  let titleToCompare = title.toLowerCase();
         //let locationToCompare = locations[0].toLowerCase();
        const ranking = {
            irelevant : 0,
@@ -77,14 +75,14 @@ const res = await axios.post('https://api.booming.jobs/api/search', payload);
             let indexOfHit = (result.findIndex(obj=>obj.id == id)+1);
       
             //let location = res.data.data.result[index].location.toLowerCase();
-            const regEx = new RegExp(titleToCompare,'g')
+            const regEx = new RegExp(title,'gi')
             let foundInTitle = titles.search(regEx);
             let foundinDescription = description.search(regEx)
 
 
            if(foundInTitle !==-1)
            {         
-               let perfect_hits_results = {link:null,title:null,description:null} 
+               let perfect_hits_results = {link:null,title:null,description:null,number_of_keyword_in_description:null} 
                let dcgPerHit = ranking.perfect/Math.log2(indexOfHit+1);
                correctHits++;
                cumulative_gain = cumulative_gain+ranking.perfect;
@@ -94,6 +92,7 @@ const res = await axios.post('https://api.booming.jobs/api/search', payload);
                perfect_hits_results.link = "https://www.booming.jobs/vacancies/"+id;
                perfect_hits_results.title = titles;
                perfect_hits_results.description = description;
+               perfect_hits_results.number_of_keyword_in_description =calculateNumberOfKeyworsInDescription(description,title);
                response.full_results.perfect_hits.push(perfect_hits_results);
             
            }   
@@ -102,7 +101,7 @@ const res = await axios.post('https://api.booming.jobs/api/search', payload);
                      
             if(foundinDescription !== -1)
             {
-                let relevant_hits_results = {link:null,title:null,description:null} 
+                let relevant_hits_results = {link:null,title:null,description:null,number_of_keyword_in_description:null} 
                  let dcgPerHit = ranking.relevant/Math.log2(indexOfHit+1);
                  titleInDescriptionHits++ ;
                  cumulative_gain = cumulative_gain+ranking.relevant;
@@ -112,6 +111,7 @@ const res = await axios.post('https://api.booming.jobs/api/search', payload);
                  relevant_hits_results.link = "https://www.booming.jobs/vacancies/"+id;
                  relevant_hits_results.title = titles;
                  relevant_hits_results.description = description;
+                 relevant_hits_results.number_of_keyword_in_description = calculateNumberOfKeyworsInDescription(description,title);
                response.full_results.relevant_hits.push(relevant_hits_results);
              
             }
@@ -135,6 +135,7 @@ const res = await axios.post('https://api.booming.jobs/api/search', payload);
            
         }
 
+        response.query_term = title;
         response.cumulative_gain = cumulative_gain;
         response.discounted_cumulative_gain = discounted_cumulative_gain;
         response.ideal_cumulative_gain = calculateIdealCumulativeGain(current_ranking);
@@ -173,10 +174,18 @@ function calculateIdealCumulativeGain(current_rank) {
     return idealCumulativeGain;
 }
 
+function calculateNumberOfKeyworsInDescription(description,term) {
+    let keyword_in_description = [];
+    let regEx = new RegExp(term,'gi')
+    while(regEx.exec(description)){
+        keyword_in_description.push(term);
+    }
+    return keyword_in_description.length;
+}
 
 router.get('/',async function(req,res)
 {
-var result = await callSearch('Software Tester',[''],24,1);  
+var result = await callSearch('QA',[''],24,1);  
 console.log(result);
 res.json(result);
 });
